@@ -13,6 +13,9 @@ const ButtonComp = styled.button`
   &.hide {
     display: none;
   }
+  &.show {
+    display: block;
+  }
 `;
 const Button = (props) => {
   const { clickEvt, visible } = props;

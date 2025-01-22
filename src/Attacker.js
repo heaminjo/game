@@ -13,7 +13,7 @@ const AttackComp = styled.img`
   &.start {
     animation-name: identifier;
     animation-duration: 0.2s;
-    animation-delay: ${(props) => props.timing + "s" || "0s"};
+    animation-delay: ${(props) => props.timing + 3 + "s" || "0s"};
   }
 `;
 const Attacker = (props) => {
