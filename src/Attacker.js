@@ -13,13 +13,17 @@ const AttackComp = styled.img`
   &.start {
     animation-name: identifier;
     animation-duration: 0.2s;
-    animation-delay: ${(props) => props.timing + 3 + "s" || "0s"};
+    animation-delay: ${(props) => props.attackTiming + 3 + "s" || "0s"};
   }
 `;
 const Attacker = (props) => {
-  const { src, timing, play } = props;
+  const { src, attackTiming, play } = props;
   return (
-    <AttackComp src={src} timing={timing} className={play ? "start" : ""} />
+    <AttackComp
+      src={src}
+      attackTiming={attackTiming}
+      className={play ? "start" : ""}
+    />
   );
 };
 export default Attacker;

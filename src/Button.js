@@ -18,9 +18,9 @@ const ButtonComp = styled.button`
   }
 `;
 const Button = (props) => {
-  const { clickEvt, visible } = props;
+  const { clickEvt, play } = props;
   return (
-    <ButtonComp onClick={clickEvt()} className={visible ? "show" : "hide"}>
+    <ButtonComp onClick={clickEvt()} className={play ? "hide" : "show"}>
       START !
     </ButtonComp>
   );

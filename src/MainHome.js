@@ -2,7 +2,7 @@ import styled from "styled-components";
 import person from "../src/image/용사.png";
 import Title from "./TitleFont";
 import Button from "./Button";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Attacker from "./Attacker";
 import Defender from "./Defender";
 import DefenderButton from "./DefenderButton";
@@ -101,47 +101,57 @@ const HomeCom = styled.section`
 `;
 
 const MainHome = () => {
-  const [visible, setVisible] = useState(true);
   const [timing, setTiming] = useState(0); //공격 시간
-  const [play, setPlay] = useState(false); //게임 시작 끝끝
+  const [play, setPlay] = useState(false); //라운드 시작 끝
   const [round, setRound] = useState(0); //라운드
   const [count, setCount] = useState(0); //카운트
-  const [isWin, setIsWin] = useState(false);
+  const [isWin, setIsWin] = useState(false); //승리 or 패배
+  const [isLose, setIsLose] = useState(false);
+
+  const attackTiming = useRef(0); //공격 타이밍
+  const startTime = useRef(0); //시작 시간 저장
 
   //start 버튼 클릭
   const onClickStart = () => {
+    randomAttackTime(); //공격시간 지정
     console.log("클릭");
-    setVisible(!visible);
     setPlay(!play);
     setRound(round + 1); //라운드 업
-    // countNum();
+
     setCount(3);
+
+    const date = new Date();
+    startTime.current = date.getSeconds(); // start 시점 초 저장
+    console.log(startTime.current);
+  };
+
+  //랜덤 공격 시간
+  const randomAttackTime = () => {
     const getRandom = (min, max) =>
       Math.floor(Math.random() * (max - min) + min);
-    setTiming(getRandom(1, 10));
 
-    playing();
+    attackTiming.current = getRandom(1, 10);
   };
 
-  const playing = () => {
-    var date = new Date();
-    const sec = date.getSeconds(); // start 시점 초 얻기
-    const clickSec = clickDefenderBtn(); // 클릭한 시간 초 얻기
-    console.log(clickSec);
-    const pass = sec + timing; // 통과 시간
-
-    setIsWin(
-      parseFloat(pass) - 0.5 < clickSec && parseFloat(pass) + 0.5 > clickSec
-        ? true
-        : false
-    );
-    console.log(isWin);
-  };
   //방어 버튼 클릭
   const clickDefenderBtn = () => {
-    var date = new Date();
+    const date = new Date();
     const clickSec = date.getSeconds(); ///클릭한 시간 초 얻기
-    return clickSec;
+    console.log(clickSec);
+
+    const pass = startTime.current + attackTiming.current + 3; // 통과 시간
+
+    //만약 60초가 넘는다면 60 빼기
+    if (pass >= 60) {
+      pass -= 60;
+    }
+    console.log("통과시간" + pass);
+    setIsWin(
+      parseFloat(pass) - 0.5 < clickSec && parseFloat(pass) + 0.5 > clickSec
+        ? setIsWin(true)
+        : setIsLose(true)
+    );
+    console.log(isWin);
   };
 
   // const countDown = () => {
@@ -176,17 +186,24 @@ const MainHome = () => {
           </div>
         </header>
         <main>
-          <h1>랜덤 {timing}</h1>
+          <h1>랜덤 {attackTiming.current}</h1>
           <h1>라운드 :{round}</h1>
           <section>
+            {/* 버튼 요소들  */}
             <div class="sec_top">
-              <Button clickEvt={() => onClickStart} visible={visible} />
-              <DefenderButton play={play} />
+              <Button clickEvt={() => onClickStart} play={play} />
+              <DefenderButton play={play} clickEvt={() => clickDefenderBtn} />
               {count > 0 && <span>{count}</span>}
+              {isWin ? <p>성공</p> : <p>실패</p>}
             </div>
+            {/* 캐릭터 요소들  */}
             <div class="sec_bottom">
-              <Attacker src={person} timing={timing} play={play} />
-              <Defender src={person} timing={timing} />
+              <Attacker
+                src={person}
+                attackTiming={attackTiming.current}
+                play={play}
+              />
+              <Defender src={person} attackTiming={attackTiming.current} />
             </div>
           </section>
         </main>

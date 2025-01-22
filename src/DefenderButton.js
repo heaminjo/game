@@ -1,3 +1,4 @@
+import { click } from "@testing-library/user-event/dist/click";
 import styled from "styled-components";
 
 const DefenBtnComp = styled.button`
@@ -21,9 +22,9 @@ const DefenBtnComp = styled.button`
   }
 `;
 const DefenderButton = (props) => {
-  const { play } = props;
+  const { play, clickEvt } = props;
   return (
-    <DefenBtnComp className={play ? "show" : "hide"}>
+    <DefenBtnComp onClick={clickEvt()} className={play ? "show" : "hide"}>
       <p>방어</p>
     </DefenBtnComp>
   );
