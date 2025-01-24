@@ -9,7 +9,7 @@ const AttackComp = styled.img`
       transform: translate(900px);
     }
   }
-
+  //공격 스타트
   &.start {
     animation-name: identifier;
     animation-duration: 0.2s;

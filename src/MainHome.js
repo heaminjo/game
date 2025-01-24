@@ -5,7 +5,8 @@ import Button from "./Button";
 import { useEffect, useRef, useState } from "react";
 import Attacker from "./Attacker";
 import Defender from "./Defender";
-import DefenderButton from "./DefenderButton";
+import WinModal from "./WinModal";
+import LoseModal from "./LoseModal";
 
 const HomeCom = styled.section`
   margin: 0;
@@ -20,7 +21,7 @@ const HomeCom = styled.section`
     }
     main {
       width: 100%;
-      height: 635px;
+      height: 655px;
       background-color: lightblue;
 
       section {
@@ -51,30 +52,36 @@ const HomeCom = styled.section`
           animation-timing-function: ease-out;
           animation-iteration-count: infinite;
         }
-        button {
-          position: absolute;
-          cursor: pointer;
-        }
         //스타트 버튼
-        button:nth-child(1) {
+        #StartButton {
+          position: absolute;
           left: 50%;
           margin-left: -200px;
         }
-        button:nth-child(1):hover {
+        #StartButton:hover {
           background-color: rgba(255, 150, 0);
           font-size: 70px;
           text-shadow: 3px 5px 20px black;
         }
+
         //방어버튼
-        button:nth-child(2) {
+        #DefenderButton {
+          position: absolute;
           right: 40px;
         }
-        button:nth-child(2):hover {
+        #DefenderButton:hover {
           background-color: #bd1f0d;
         }
-        button:nth-child(2):active {
+        #DefenderButton:active {
           box-shadow: 1px 1px 6px #000;
           right: 35px;
+        }
+        //성공 모달
+        .modal {
+          position: absolute;
+          left: 50%;
+          margin-left: -250px;
+          z-index: 10;
         }
       }
       .sec_bottom {
@@ -91,6 +98,15 @@ const HomeCom = styled.section`
         img:nth-child(2) {
           right: 0;
         }
+        h3 {
+          position: absolute;
+          left: 50%;
+          margin-left: -150px;
+          bottom: 150px;
+          font-size: 70px;
+          color: #fff;
+          text-shadow: 2px 2px 2px #999;
+        }
       }
     }
     footer {
@@ -101,31 +117,50 @@ const HomeCom = styled.section`
 `;
 
 const MainHome = () => {
-  const [timing, setTiming] = useState(0); //공격 시간
   const [play, setPlay] = useState(false); //라운드 시작 끝
   const [round, setRound] = useState(0); //라운드
   const [count, setCount] = useState(0); //카운트
-  const [isWin, setIsWin] = useState(false); //승리 or 패배
-  const [isLose, setIsLose] = useState(false);
 
+  const isWin = useRef(false); //승리 창창
+  const isLose = useRef(false); //패배 창
   const attackTiming = useRef(0); //공격 타이밍
   const startTime = useRef(0); //시작 시간 저장
 
   //start 버튼 클릭
   const onClickStart = () => {
+    //시작하면 창 모두 내림림
+    isWin.current = false;
+    isLose.current = false;
+
     randomAttackTime(); //공격시간 지정
-    console.log("클릭");
-    setPlay(!play);
+    setPlay(!play); //게임 시작
     setRound(round + 1); //라운드 업
 
     setCount(3);
 
     const date = new Date();
-    startTime.current = date.getSeconds(); // start 시점 초 저장
-    console.log(startTime.current);
+    console.log(date.getMilliseconds());
+    startTime.current = 1000 * date.getSeconds() + date.getMilliseconds(); // start 시점 초 저장
   };
 
-  //랜덤 공격 시간
+  //다음 라운드 클릭
+  const onClickNext = () => {
+    setRound(round + 1);
+    onClickStart();
+  };
+
+  // 다시하기 클릭
+  const onClickAgain = () => {
+    setRound(0);
+    onClickStart();
+  };
+
+  //종료 클릭
+  const onClickEnd = () => {
+    isLose.current = false;
+    setRound(0);
+  };
+  //** 랜덤 공격 시간 **
   const randomAttackTime = () => {
     const getRandom = (min, max) =>
       Math.floor(Math.random() * (max - min) + min);
@@ -133,51 +168,33 @@ const MainHome = () => {
     attackTiming.current = getRandom(1, 10);
   };
 
-  //방어 버튼 클릭
+  //** 방어 버튼 클릭 **
   const clickDefenderBtn = () => {
     const date = new Date();
-    const clickSec = date.getSeconds(); ///클릭한 시간 초 얻기
-    console.log(clickSec);
+    const clickSec = 1000 * date.getSeconds() + date.getMilliseconds(); ///클릭한 시간 초 얻기
 
-    const pass = startTime.current + attackTiming.current + 3; // 통과 시간
+    let pass = startTime.current + attackTiming.current * 1000 + 3000; // 통과 시간
 
-    //만약 60초가 넘는다면 60 빼기
-    if (pass >= 60) {
-      pass -= 60;
-    }
-    console.log("통과시간" + pass);
-    setIsWin(
-      parseFloat(pass) - 0.5 < clickSec && parseFloat(pass) + 0.5 > clickSec
-        ? setIsWin(true)
-        : setIsLose(true)
-    );
-    console.log(isWin);
+    console.log("클릭 시간" + clickSec);
+    console.log("통과 시간" + pass);
+
+    //결과 판단
+    // console.log(pass === clickSec);
+    pass - 100 < clickSec && pass + 200 > clickSec
+      ? (isWin.current = true)
+      : (isLose.current = true);
+
+    console.log(`성공?: ${isWin.current}`);
+    console.log(`실패?: ${isLose.current}`);
+    setPlay(!play); //게임 종료(라운드)
   };
 
-  // const countDown = () => {
-  //   let num = count - 1;
-  //   setCount(num);
-  //   console.log(num);
-  // };
-
-  // //3 카운트
-  // const countNum = () => {
-  //   //1초 단위로 countDown 함수 실행
-  //   const interval = setInterval(() => {
-  //     countDown();
-  //   }, 1000);
-
-  //   //3초뒤 실행 중지
-  //   setTimeout(function () {
-  //     clearInterval(interval);
-  //   }, 3000);
-  // };
-
+  //카운트가 변화하면 실행
   useEffect(() => {
     count > 0 && setTimeout(() => setCount(count - 1), 1000);
   }, [count]);
-  //well-made-codestory.tistory.com/45 [SJ BackEnd Log:티스토리]
-  출처: https: return (
+
+  return (
     <HomeCom>
       <div className="container">
         <header>
@@ -186,15 +203,32 @@ const MainHome = () => {
           </div>
         </header>
         <main>
-          <h1>랜덤 {attackTiming.current}</h1>
-          <h1>라운드 :{round}</h1>
           <section>
             {/* 버튼 요소들  */}
             <div class="sec_top">
-              <Button clickEvt={() => onClickStart} play={play} />
-              <DefenderButton play={play} clickEvt={() => clickDefenderBtn} />
+              <Button
+                id="StartButton"
+                clickEvt={() => onClickStart}
+                play={play}
+                text="START !"
+              />
+              <Button
+                id="DefenderButton"
+                play={!play}
+                clickEvt={() => clickDefenderBtn}
+                text="방어"
+              />
               {count > 0 && <span>{count}</span>}
-              {isWin ? <p>성공</p> : <p>실패</p>}
+              {isWin.current && (
+                <WinModal className="modal" clickEvt={() => onClickNext} />
+              )}
+              {isLose.current && (
+                <LoseModal
+                  className="modal"
+                  clickEvt1={() => onClickAgain}
+                  clickEvt2={() => onClickEnd}
+                />
+              )}
             </div>
             {/* 캐릭터 요소들  */}
             <div class="sec_bottom">
@@ -204,6 +238,7 @@ const MainHome = () => {
                 play={play}
               />
               <Defender src={person} attackTiming={attackTiming.current} />
+              {count > 0 && <h3>{round} 라운드</h3>}
             </div>
           </section>
         </main>
