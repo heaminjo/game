@@ -121,10 +121,12 @@ const MainHome = () => {
   const [round, setRound] = useState(0); //라운드
   const [count, setCount] = useState(0); //카운트
 
-  const isWin = useRef(false); //승리 창창
-  const isLose = useRef(false); //패배 창
+  const isWin = useRef(false); //승리
+  const isLose = useRef(false); //패배
+  const pass = useRef(0); //성공 시간간
   const attackTiming = useRef(0); //공격 타이밍
   const startTime = useRef(0); //시작 시간 저장
+  const clickTime = useRef(0); //방어 클릭 시간간
 
   //start 버튼 클릭
   const onClickStart = () => {
@@ -171,16 +173,18 @@ const MainHome = () => {
   //** 방어 버튼 클릭 **
   const clickDefenderBtn = () => {
     const date = new Date();
-    const clickSec = 1000 * date.getSeconds() + date.getMilliseconds(); ///클릭한 시간 초 얻기
+    clickTime.current = 1000 * date.getSeconds() + date.getMilliseconds(); ///클릭한 시간 초 얻기
 
-    let pass = startTime.current + attackTiming.current * 1000 + 3000; // 통과 시간
+    //달려오는 시간 200(0.2초) 추가
+    pass.current = startTime.current + attackTiming.current * 1000 + 3000 + 500; // 통과 시간
 
-    console.log("클릭 시간" + clickSec);
-    console.log("통과 시간" + pass);
+    console.log("클릭 시간" + clickTime.current);
+    console.log("통과 시간" + pass.current);
 
     //결과 판단
-    // console.log(pass === clickSec);
-    pass - 100 < clickSec && pass + 200 > clickSec
+    // 성공 시간 기준 -0.3초 ~ +0.4초
+    pass.current - 300 < clickTime.current &&
+    pass.current + 400 > clickTime.current
       ? (isWin.current = true)
       : (isLose.current = true);
 
@@ -220,7 +224,12 @@ const MainHome = () => {
               />
               {count > 0 && <span>{count}</span>}
               {isWin.current && (
-                <WinModal className="modal" clickEvt={() => onClickNext} />
+                <WinModal
+                  className="modal"
+                  clickEvt={() => onClickNext}
+                  pass={pass.current}
+                  defender={clickTime.current}
+                />
               )}
               {isLose.current && (
                 <LoseModal

@@ -12,7 +12,7 @@ const AttackComp = styled.img`
   //공격 스타트
   &.start {
     animation-name: identifier;
-    animation-duration: 0.2s;
+    animation-duration: 0.5s;
     animation-delay: ${(props) => props.attackTiming + 3 + "s" || "0s"};
   }
 `;
